@@ -63,11 +63,31 @@ if __name__ == "__main__":
 
     start = initialize_start(grid)  # Initialize start based on selected grid
     goal = initialize_goal(grid)    # Initialize goal based on selected grid
+    
+    time_of_day = input("Input time_of_day (morning, afternoon, evening, night): ").strip().lower()  # Get time of day from user input
 
     candidate_paths = find_candidate_paths(grid, start, goal, 3)                        # Returns candidate paths as a list of lists
     pathA, pathB, pathC = candidate_paths[0], candidate_paths[1], candidate_paths[2]    # Initializes each candidate path to its own variable
 
-    # Currently just printing each path for demonstration purposes. Feel free to change/remove
-    print("Path A:", pathA)
-    print("Path B:", pathB)
-    print("Path C:", pathC)
+    paths = [("Route A", pathA), ("Route B", pathB), ("Route C", pathC)]
+    
+    #delay_probability = get_delay_probability(time_of_day)  # Get delay probability based on time of day
+    
+    for route_id, path in paths:
+        # Classify the route based on its characteristics
+        time_of_day, congestion_level, distance, zone_type = extract_route_features(path, grid, time_of_day)  
+        predicted_delay = predict_delay(time_of_day, zone_type, congestion_level, distance) 
+        
+        print(f"\n{route_id}:")
+        print(f"  Path:              {path}")
+        #print(f"  Steps:             {len(path)}")
+        print(f"  Distance:          {distance}")
+        print(f"  Zone type:         {zone_type}")
+        print(f"  Congestion:        {congestion_level}")
+        print(f"  Predicted delay:   {predicted_delay}")
+        #print(f"  Delay probability: {delay_probability}")
+
+    # # Currently just printing each path for demonstration purposes. Feel free to change/remove
+    # print("Path A:", pathA)
+    # print("Path B:", pathB)
+    # print("Path C:", pathC)
