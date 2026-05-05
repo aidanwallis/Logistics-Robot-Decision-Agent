@@ -5,8 +5,10 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.tree import DecisionTreeClassifier
 
+FEATURE_COLUMNS = ["congestion_level", "distance", "time_of_day", "zone_type"]
+
 def load_and_train_model():
-    data = pd.read_csv('logistics_robot_data.csv')
+    data = pd.read_csv('data/robot_delay_data.csv')
     
     encoders = {}
     for column in data.columns:
@@ -15,8 +17,7 @@ def load_and_train_model():
         encoders[column] = label_encoder
         
         
-    feature_columns = ["congestion_level", "delay_level", "distance", "time_of_day", "zone_type"]
-    X = data[feature_columns]
+    X = data[FEATURE_COLUMNS]
     y = data["delay_level"]
 
     model = DecisionTreeClassifier(random_state=42)
@@ -64,7 +65,8 @@ def predict_delay(time_of_day, zone_type, congestion_level, distance):
     encoded_congestion = ENCODERS["congestion_level"].transform([congestion_level])[0]
     encoded_distance = ENCODERS["distance"].transform([distance])[0]
     
-    input_features = [[encoded_congestion, encoded_distance, encoded_time, encoded_zone]]
+    input_features = pd.DataFrame([[encoded_time, encoded_zone, encoded_congestion, encoded_distance]],columns=FEATURE_COLUMNS)   
+    
     numeric_prediction = MODEL.predict(input_features)[0]
     
     predicted_label = ENCODERS["delay_level"].inverse_transform([numeric_prediction])[0]
@@ -72,7 +74,37 @@ def predict_delay(time_of_day, zone_type, congestion_level, distance):
     return predicted_label
 
 
+def get_delay_probability(time_of_day):
 
+    delay_probability_tabel = {
+        "morning": 0.25,
+        "afternoon": 0.45,
+        "evening": 0.7,
+        "night": 0.2
+    }
+
+    # default to 0.5 if time_of_day is not recognized
+    return delay_probability_tabel.get(time_of_day, 0.5) 
 
 
 MODEL, ENCODERS = load_and_train_model()
+
+# SELF-TEST
+if __name__ == "__main__":
+
+    # Test 1: evening + high_traffic + high congestion + short distance -> expect HIGH delay
+    result1 = predict_delay("evening", "high_traffic", "high", "short")
+    print("Test 1 (evening/high_traffic/high/short):", result1)
+    print("  Expected: high")
+
+    # Test 2: morning + normal + low congestion + short distance -> expect LOW delay
+    result2 = predict_delay("morning", "normal", "low", "short")
+    print("Test 2 (morning/normal/low/short):", result2)
+    print("  Expected: low")
+
+    # Test 3: verify delay probability lookup
+    print("Evening delay probability:", get_delay_probability("evening"))
+    print("  Expected: 0.7")
+
+    print("Morning delay probability:", get_delay_probability("morning"))
+    print("  Expected: 0.25")
