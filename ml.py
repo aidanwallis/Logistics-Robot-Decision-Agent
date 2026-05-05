@@ -58,6 +58,19 @@ def extract_route_features(route, grid, time_of_day):
     
     return time_of_day, congestion_level, distance, zone_type
 
+def predict_delay(time_of_day, zone_type, congestion_level, distance):
+    encoded_time = ENCODERS["time_of_day"].transform([time_of_day])[0]
+    encoded_zone = ENCODERS["zone_type"].transform([zone_type])[0]
+    encoded_congestion = ENCODERS["congestion_level"].transform([congestion_level])[0]
+    encoded_distance = ENCODERS["distance"].transform([distance])[0]
+    
+    input_features = [[encoded_congestion, encoded_distance, encoded_time, encoded_zone]]
+    numeric_prediction = MODEL.predict(input_features)[0]
+    
+    predicted_label = ENCODERS["delay_level"].inverse_transform([numeric_prediction])[0]
+    
+    return predicted_label
+
 
 
 
