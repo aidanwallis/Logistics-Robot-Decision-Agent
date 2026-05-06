@@ -70,24 +70,13 @@ if __name__ == "__main__":
     pathA, pathB, pathC = candidate_paths[0], candidate_paths[1], candidate_paths[2]    # Initializes each candidate path to its own variable
 
     paths = [("Route A", pathA), ("Route B", pathB), ("Route C", pathC)]
-    
-    #delay_probability = get_delay_probability(time_of_day)  # Get delay probability based on time of day
-    
-    for route_id, path in paths:
-        # Classify the route based on its characteristics
-        time_of_day, congestion_level, distance, zone_type = extract_route_features(path, grid, time_of_day)  
-        predicted_delay = predict_delay(time_of_day, zone_type, congestion_level, distance) 
-        
-        print(f"\n{route_id}:")
-        print(f"  Path:              {path}")
-        #print(f"  Steps:             {len(path)}")
-        print(f"  Distance:          {distance}")
-        print(f"  Zone type:         {zone_type}")
-        print(f"  Congestion:        {congestion_level}")
-        print(f"  Predicted delay:   {predicted_delay}")
-        #print(f"  Delay probability: {delay_probability}")
 
-    # # Currently just printing each path for demonstration purposes. Feel free to change/remove
-    # print("Path A:", pathA)
-    # print("Path B:", pathB)
-    # print("Path C:", pathC)
+    route_evaluations, best_route = evaluate_candidate_routes(
+        paths,
+        grid,
+        time_of_day,
+        extract_route_features,
+        predict_delay
+    )
+
+    print_final_decision(route_evaluations, best_route)
